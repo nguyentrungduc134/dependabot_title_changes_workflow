@@ -41,9 +41,9 @@ jobs:
           fi
 
           # Determine prefix based on PR body
-          if echo "$PR_BODY_TEXT" | grep -iqE "fix|security|CVE|bug"; then
+          if echo "$PR_BODY" | grep -iqE "fix|security|CVE|bug"; then
             PREFIX="fix"
-          elif echo "$PR_BODY_TEXT" | grep -iqE "breaking change|new feature|major update"; then
+          elif echo "$PR_BODY" | grep -iqE "breaking change|new feature|major update"; then
             PREFIX="feat"
           else
             PREFIX="feat"  # Default to feat if no keywords are found
