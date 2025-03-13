@@ -1,7 +1,7 @@
 # Update Dependabot PR Title
 <!-- x-release-please-start-version -->
   ```
-    Version : '0.1.8'
+    Version : '0.2.0'
   ```
 <!-- x-release-please-end -->
 
