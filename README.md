@@ -1,4 +1,4 @@
-# repo_template
+# Update Dependabot PR Title
 <!-- x-release-please-start-version -->
   ```
     Version : '0.1.8'
@@ -9,7 +9,7 @@ Here’s a README for your GitHub Action:
 
 ---
 
-# Update Dependabot PR Title
+
 
 This GitHub Action automatically updates the title of Dependabot PRs based on the modules updated and the PR body content. It follows semantic versioning conventions and prefixes PR titles accordingly.
 
