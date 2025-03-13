@@ -1,0 +1,33 @@
+name: Update PR Title Based on Module Update
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+
+jobs:
+  update-title:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set PR title based on module update
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          
+          # Check if module `terraform-aws-modules/vpc/aws` is mentioned in the PR title
+          if [[ "$PR_TITLE" =~ "terraform-aws-modules/vpc/aws" ]]; then
+            NEW_TITLE="fix: Update terraform-aws-modules/vpc/aws module from 2.0.0 to 3.0.0"
+          else
+            NEW_TITLE="chore: Update dependencies"
+          fi
+
+          echo "New PR title: $NEW_TITLE"
+          
+          # Update PR title using GitHub API
+          curl -X PATCH -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -d '{"title": "'"$NEW_TITLE"'"}' \
+            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}"
