@@ -1,3 +1,1 @@
 terraform-aws-modules/vpc/aws
-terraform-aws-modules/security-group/aws
-terraform-aws-modules/s3-bucket/aws
