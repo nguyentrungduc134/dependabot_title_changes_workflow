@@ -30,14 +30,14 @@ jobs:
           PR_TITLE="${{ github.event.pull_request.title }}"
           PR_BODY="${{ github.event.pull_request.body }}"
 
-          # Log the PR body for debugging purposes
-          echo "PR Body: $PR_BODY"
+          # Log the PR body for debugging purposes using printf
+          printf "PR Body: %s\n" "$PR_BODY"
 
           # Convert HTML body to plain text using html2text
           PR_BODY_TEXT=$(echo "$PR_BODY" | html2text)
 
           # Log the PR body without HTML tags
-          echo "PR Body (plain text): $PR_BODY_TEXT"
+          printf "PR Body (plain text): %s\n" "$PR_BODY_TEXT"
 
           # Ensure the PR body is not empty
           if [[ -z "$PR_BODY_TEXT" ]]; then
