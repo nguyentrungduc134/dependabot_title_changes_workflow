@@ -20,6 +20,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Install html2text
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y html2text
+
       - name: Update PR Title Based on Module Updates and PR Body
         run: |
           PR_TITLE="${{ github.event.pull_request.title }}"
@@ -28,8 +33,14 @@ jobs:
           # Log the PR body for debugging purposes
           echo "PR Body: $PR_BODY"
 
+          # Convert HTML body to plain text using html2text
+          PR_BODY_TEXT=$(echo "$PR_BODY" | html2text)
+
+          # Log the PR body without HTML tags
+          echo "PR Body (plain text): $PR_BODY_TEXT"
+
           # Ensure the PR body is not empty
-          if [[ -z "$PR_BODY" ]]; then
+          if [[ -z "$PR_BODY_TEXT" ]]; then
             echo "PR body is empty. Exiting."
             exit 0
           fi
@@ -41,9 +52,9 @@ jobs:
           fi
 
           # Determine prefix based on PR body
-          if echo "$PR_BODY" | grep -iqE "fix|security|CVE|bug"; then
+          if echo "$PR_BODY_TEXT" | grep -iqE "fix|security|CVE|bug"; then
             PREFIX="fix"
-          elif echo "$PR_BODY" | grep -iqE "breaking change|new feature|major update"; then
+          elif echo "$PR_BODY_TEXT" | grep -iqE "breaking change|new feature|major update"; then
             PREFIX="feat"
           else
             PREFIX="feat"  # Default to feat if no keywords are found
