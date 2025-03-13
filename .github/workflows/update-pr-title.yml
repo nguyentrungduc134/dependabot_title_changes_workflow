@@ -28,9 +28,16 @@ jobs:
       - name: Update PR Title Based on Module Updates and PR Body
         run: |
           PR_TITLE="${{ github.event.pull_request.title }}"
-          PR_BODY="${{ github.event.pull_request.body }}"
+          
+          # Fetch PR body using GitHub API and jq (to handle special characters)
+          PR_BODY=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}" | jq -r '.body')
 
-          # Sanitize PR body to prevent issues with special characters
+          # Log the PR body for debugging purposes
+          printf "PR Body: %s\n" "$PR_BODY"
+
+          # Sanitize PR body to prevent issues with special characters (remove @mentions)
           PR_BODY_SANITIZED=$(echo "$PR_BODY" | sed 's/@[^ ]*//g')  # Remove mentions like @dependabot
 
           # Log the sanitized PR body for debugging purposes
