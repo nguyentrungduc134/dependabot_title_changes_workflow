@@ -8,7 +8,8 @@ on:
       - edited
 
 permissions:
-  pull-requests: write  # ✅ Allow PR title updates
+  contents: read  # ✅ Allow checking out the repo
+  pull-requests: write  # ✅ Allow updating PR titles
 
 jobs:
   update-title:
