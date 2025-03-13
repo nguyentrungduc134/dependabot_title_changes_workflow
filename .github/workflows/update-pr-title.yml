@@ -25,6 +25,15 @@ jobs:
           PR_TITLE="${{ github.event.pull_request.title }}"
           PR_BODY="${{ github.event.pull_request.body }}"
 
+          # Log the PR body for debugging purposes
+          echo "PR Body: $PR_BODY"
+
+          # Ensure the PR body is not empty
+          if [[ -z "$PR_BODY" ]]; then
+            echo "PR body is empty. Exiting."
+            exit 0
+          fi
+
           # Ensure modules.txt exists
           if [[ ! -f modules.txt ]]; then
             echo "modules.txt not found, creating an empty file."
@@ -48,15 +57,6 @@ jobs:
 
           # Check if PR title matches any module in modules.txt
           while IFS= read -r module || [[ -n "$module" ]]; do
-            # Skip empty lines and remove any leading/trailing whitespace
-            module=$(echo "$module" | xargs)
-
-            if [[ -z "$module" ]]; then
-              continue
-            fi
-
-            echo "Checking module: $module"
-
             if [[ "$PR_TITLE" =~ "$module" ]]; then
               NEW_TITLE="$PREFIX: $PR_TITLE"
               echo "Updating PR title to: $NEW_TITLE"
