@@ -20,21 +20,46 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Update PR Title Based on Module Update
+      - name: Update PR Title Based on Module Updates and PR Body
         run: |
           PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_BODY="${{ github.event.pull_request.body }}"
 
-          # Check if the PR contains a Terraform module update
-          if [[ "$PR_TITLE" =~ "terraform-aws-modules/vpc/aws" ]]; then
-            NEW_TITLE="fix: Update terraform-aws-modules/vpc/aws module from old to new version"
-          else
-            NEW_TITLE="chore: Update dependencies"
+          # Ensure modules.txt exists
+          if [[ ! -f modules.txt ]]; then
+            echo "modules.txt not found, creating an empty file."
+            touch modules.txt
           fi
 
-          echo "Updating PR title to: $NEW_TITLE"
+          # Determine prefix based on PR body
+          if echo "$PR_BODY" | grep -iqE "fix|security|CVE|bug"; then
+            PREFIX="fix"
+          elif echo "$PR_BODY" | grep -iqE "breaking change|new feature|major update"; then
+            PREFIX="feat"
+          else
+            PREFIX="feat"  # Default to feat if no keywords are found
+          fi
 
-          # Update PR title using GitHub API
-          curl -X PATCH -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            -d '{"title": "'"$NEW_TITLE"'"}' \
-            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}"
+          # Check if PR title already starts with fix: or feat:
+          if [[ "$PR_TITLE" =~ ^fix: || "$PR_TITLE" =~ ^feat: ]]; then
+            echo "PR title already follows convention, no change needed."
+            exit 0
+          fi
+
+          # Check if PR title matches any module in modules.txt
+          while IFS= read -r module || [[ -n "$module" ]]; do
+            if [[ "$PR_TITLE" =~ "$module" ]]; then
+              NEW_TITLE="$PREFIX: $PR_TITLE"
+              echo "Updating PR title to: $NEW_TITLE"
+
+              # Update PR title using GitHub API
+              curl -X PATCH -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                -H "Accept: application/vnd.github.v3+json" \
+                -d '{"title": "'"$NEW_TITLE"'"}' \
+                "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}"
+
+              exit 0
+            fi
+          done < modules.txt
+
+          echo "PR does not match any modules in modules.txt. No title changes needed."
